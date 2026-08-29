@@ -1,6 +1,6 @@
 # rocm-llama.cpp
 
-Lab fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) for **consumer RDNA4 (gfx1201)** — dual Radeon AI PRO R9700, ROCm/HIP tensor-split, long context, MTP.
+Lab fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) for **consumer RDNA4 (gfx1201)** — ROCm/HIP tensor-split, long context, MTP.
 
 **Point an AI agent at [`AGENTS.md`](AGENTS.md).** Humans can follow the same commands below.
 
