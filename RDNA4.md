@@ -12,4 +12,5 @@ Fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp). HIP overlay
 | [docs/rdna4/HIP.md](docs/rdna4/HIP.md) | hang is HIP; overlay |
 | [docs/rdna4/HIP-BUILD.md](docs/rdna4/HIP-BUILD.md) | isolated CLR rebuild |
 | [docs/rdna4/STEW.md](docs/rdna4/STEW.md) | 01 only in product |
+| [docs/rdna4/BENCH.md](docs/rdna4/BENCH.md) | tok/s, this box only |
 | [docs/rdna4/ROCM-PR.md](docs/rdna4/ROCM-PR.md) | rocblit PR draft — not filed |

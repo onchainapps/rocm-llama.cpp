@@ -41,6 +41,7 @@ Full table: [`docs/rdna4/PIN.md`](docs/rdna4/PIN.md).
 │   ├── HIP.md                # hang is HIP, overlay recipe
 │   ├── HIP-BUILD.md          # isolated CLR prefix (no /opt/rocm writes)
 │   ├── STEW.md               # which stew blocks, measured
+│   ├── BENCH.md              # tok/s table + method
 │   ├── ROCM-PR.md            # CLR rocblit PR draft — not filed
 │   └── patches/rocblit-gfx1201-rect-dma.patch
 ├── scripts/
@@ -150,22 +151,21 @@ Discrete cards only. mmap GGUF. Lab tensor port here is `:18080`.
 
 Vanilla in-tree MTP (`--spec-type draft-mtp`) is the big jump vs spec none. 01 is adaptive depth on top of that.
 
-## What we measured (honest)
+## Benchmarks
 
-Vehicle: llama `5ea1b124e`, HIP **53211**, dual R9700 tensor-split, **UD-Q8_K_XL**, `-c 262144`.
+This box, this GGUF, this `-c`. Method + full ladder: [`docs/rdna4/BENCH.md`](docs/rdna4/BENCH.md).
 
-| stack | open (essay decode-512) | code (decode-512) | 10k prefill |
-|---|---|---|---|
-| spec none | ~27.3 | ~27.3 | — |
-| vanilla mtp2 | 43.0 | 56.2 | **1249** |
-| stew **01** adaptive | 42.9 | **61.8** | 1203 |
-| 01+10 | 43.5 | 59.9 | 1201 |
-| 01+10+02 | 43.6 | 59.7 | 1191 |
+| stack | open (essay decode-512) | code (decode-512) | 10k pp |
+|---|---:|---:|---:|
+| spec none | 27.13 | 27.33 | — |
+| vanilla mtp2 | 42.95 | 56.17 | 1249 |
+| stew **01** adaptive | 42.89 | **61.79** | 1203 |
+| 01+10 | 43.53 | 59.85 | 1201 |
+| 01+10+02 | 43.59 | 59.71 | 1191 |
 
-- Real jump = **stock llama MTP**, not stew.
+- Jump ~27 → ~56 **code** is in-tree MTP.
 - **01** helps **code**. Essays stay ~43.
-- **10** / **02** = wash on this GGUF. Not product.
-- 1337hero **53.1** open was a **Q8_0** path, not this XL file.
+- **10** / **02** wash on **UD-Q8_K_XL**. Not product.
 
 ## ROCm PR (HIP `.so` for everyone)
 
