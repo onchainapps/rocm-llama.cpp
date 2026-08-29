@@ -4,7 +4,7 @@ Consumer **gfx1201** (Radeon AI PRO R9700) lab fork of [ggml-org/llama.cpp](http
 
 **Front door:** [README.md](README.md) · **agents:** [AGENTS.md](AGENTS.md)
 
-We did not write llama.cpp. Credits: ggml-org, [stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts), AMD ROCm/HIP. We do not vendor `libamdhip64.so`.
+Fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp). HIP overlay is ours. stew **01** is optional. No `libamdhip64.so` in git.
 
 | Doc | |
 |---|---|

@@ -6,7 +6,7 @@ This tree **is** llama.cpp plus lab pins, a HIP overlay for the gfx1201 load han
 
 **Point an AI agent at [`AGENTS.md`](AGENTS.md).** Humans can follow the same commands below.
 
-## Credits (not ours)
+## Credits
 
 | Project | Who | What |
 |---|---|---|
