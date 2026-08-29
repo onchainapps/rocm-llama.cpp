@@ -1,6 +1,6 @@
-# ROCm PR draft — gfx1201 rocblit rect-DMA (NOT FILED)
+# ROCm PR — gfx1201 rocblit rect-DMA
 
-**Status:** prepared for a human to paste. **Do not** `gh pr create` unless the repo owner says **file it**.
+**Status:** **filed** 2026-08-29 as [ROCm/rocm-systems#10940](https://github.com/ROCm/rocm-systems/pull/10940) (`develop`, `bakon11:users/bakon11/gfx1201-rocblit-rect-dma`).
 
 ## Where it goes
 
