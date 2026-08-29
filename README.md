@@ -2,8 +2,6 @@
 
 Lab fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) for **consumer RDNA4 (gfx1201)** — dual Radeon AI PRO R9700, ROCm/HIP tensor-split, long context, MTP.
 
-This tree **is** llama.cpp plus lab pins, a HIP overlay for the gfx1201 load hang, and an agent-safe setup path. From [stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts) we keep **one** optional patch: **01 adaptive MTP**. The rest of his quilt we measured on this GGUF and did not take.
-
 **Point an AI agent at [`AGENTS.md`](AGENTS.md).** Humans can follow the same commands below.
 
 ## Credits
