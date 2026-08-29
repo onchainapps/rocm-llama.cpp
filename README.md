@@ -1,6 +1,18 @@
 # rocm-llama.cpp
 
+<div align="center">
+
+<img src="docs/rdna4/assets/logo.png" width="240" alt="rocm-llama.cpp">
+
 Lab fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) for **consumer RDNA4 (gfx1201)** — ROCm/HIP tensor-split, long context, MTP.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![HIP](https://img.shields.io/badge/HIP-53211-red.svg)](docs/rdna4/HIP.md)
+[![gfx1201](https://img.shields.io/badge/GPU-gfx1201-orange.svg)](docs/rdna4/PIN.md)
+[![stew 01](https://img.shields.io/github/actions/workflow/status/onchainapps/rocm-llama.cpp/rdna4-stew01-apply.yml?label=stew-01)](https://github.com/onchainapps/rocm-llama.cpp/actions/workflows/rdna4-stew01-apply.yml)
+[![Upstream](https://img.shields.io/github/v/release/ggml-org/llama.cpp?label=upstream&filter=b*&color=brightgreen)](https://github.com/ggml-org/llama.cpp/releases?q=b)
+
+</div>
 
 **Point an AI agent at [`AGENTS.md`](AGENTS.md).** Humans can follow the same commands below.
 
@@ -43,7 +55,8 @@ Full table: [`docs/rdna4/PIN.md`](docs/rdna4/PIN.md).
 │   ├── STEW.md               # which stew blocks, measured
 │   ├── BENCH.md              # tok/s table + method
 │   ├── ROCM-PR.md            # CLR rocblit PR draft — not filed
-│   └── patches/rocblit-gfx1201-rect-dma.patch
+│   ├── assets/logo.png
+│   └── patches/              # 7.2.4 measured + rocm-systems develop
 ├── scripts/
 │   ├── apply-rocm.sh         # check / env / cmake / stew-01
 │   └── build-hip-overlay.sh  # isolated libamdhip64 from CLR + patch
