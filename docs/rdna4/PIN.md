@@ -7,7 +7,7 @@ One line of truth. Bump here when a named A/B lands — not from vibes.
 | llama.cpp (GitHub default branch) | `master` of this fork = ggml-org `master` at fork time | Keep up with upstream. |
 | llama.cpp (lab-measured HIP vehicle) | `5ea1b124e` | LOAD_OK with HIP **53211** on dual R9700. Vanilla discriminator. |
 | GPU target | `gfx1201` | RDNA4 R9700. |
-| ROCm distro package | **7.2.4** (`/opt/rocm` → distro) | Do **not** overwrite `/opt/rocm`. |
+| ROCm development (current) | [ROCm/TheRock](https://github.com/ROCm/TheRock) | Superbuild. CLR is `rocm-systems` submodule. Not the 7.2.4 overlay pin. |
 | HIP soname that LOAD_OKs tensor-split | `libamdhip64.so.7.2.53211` | gfx1201 rect-DMA rocblit (userspace). |
 | HIP soname that **hangs** load | `libamdhip64.so.7.2.70204` | Stock distro HIP. `hipMemcpy2DAsync` / `copyBufferRect` hang class. |
 | stew quilt | [stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts) | His README current checkpoint is `baseline/fe235f434` on **ROCm 7.14**. That is **not** this box. |

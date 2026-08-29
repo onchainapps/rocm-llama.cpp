@@ -10,6 +10,8 @@ On shipping ROCm **7.2.70204**, dual-GPU tensor-split can stick at weight load:
 
 **What works here:** HIP **`libamdhip64.so.7.2.53211`** (lab “product-clean” rocblit: gfx1201 → line DMA). Same llama binary, soname swap, LOAD_OK.
 
+Patch: [`patches/rocblit-gfx1201-rect-dma.patch`](patches/rocblit-gfx1201-rect-dma.patch). Isolated rebuild: [`HIP-BUILD.md`](HIP-BUILD.md). AMD PR draft (not filed): [`ROCM-PR.md`](ROCM-PR.md).
+
 HSA *why* copyBufferRect deadlocks on 70204 is still **unproven**. We document the A/B, we don’t invent a kernel story.
 
 ## Do not overwrite `/opt/rocm`

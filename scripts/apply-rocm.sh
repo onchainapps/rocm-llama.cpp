@@ -20,7 +20,7 @@ Usage: scripts/apply-rocm.sh <command> [options]
 
 Never copies a .so onto /opt/rocm. Never runs stew apply-all.
 
-See RDNA4.md, docs/rdna4/HIP.md, docs/rdna4/STEW.md, docs/rdna4/PIN.md.
+See README.md, AGENTS.md, docs/rdna4/.
 EOF
 }
 

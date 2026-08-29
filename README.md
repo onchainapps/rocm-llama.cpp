@@ -1,130 +1,200 @@
-# llama.cpp
+# rocm-llama.cpp
 
-> **This GitHub repo (`onchainapps/rocm-llama.cpp`) is a lab fork, not upstream.**
-> We did not write llama.cpp. Credits: **[ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp)** (this tree), **[stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts)** (optional RDNA patches we may apply), **AMD ROCm/HIP** (runtime; we do not vendor `libamdhip64.so`).
-> RDNA4 / gfx1201 notes, HIP `.so` pin, and `scripts/apply-rocm.sh`: **[RDNA4.md](RDNA4.md)**.
+Lab fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) for **consumer RDNA4 (gfx1201)** — dual Radeon AI PRO R9700, ROCm/HIP tensor-split, long context, MTP.
 
-![llama](https://raw.githubusercontent.com/ggml-org/llama.brand/refs/heads/master/cover/llama-cpp/cover-llama-cpp-dark.svg)
+This tree **is** llama.cpp. The extra work is pins, HIP overlay, measured stew blocks, and an agent-safe setup path. We did not write llama.cpp and we do not rebrand [stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts).
 
-<div align="center">
+**Point an AI agent at [`AGENTS.md`](AGENTS.md).** Humans can follow the same commands below.
 
-<b>LLM inference in C/C++</b>
+## Credits (not ours)
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/github/v/release/ggml-org/llama.cpp?filter=v*&color=brightgreen)](https://github.com/ggml-org/llama.cpp/releases?q=tag:v0)
-[![Nightly](https://img.shields.io/github/v/release/ggml-org/llama.cpp?label=nightly&filter=b*&color=orange)](https://github.com/ggml-org/llama.cpp/releases?q=b)
-[![Server](https://img.shields.io/github/actions/workflow/status/ggml-org/llama.cpp/server.yml?label=Server)](https://github.com/ggml-org/llama.cpp/actions/workflows/server.yml)
-[![Docker](https://img.shields.io/github/actions/workflow/status/ggml-org/llama.cpp/docker.yml?label=Docker)](https://github.com/ggml-org/llama.cpp/actions/workflows/docker.yml)
-[![Winget](https://img.shields.io/github/actions/workflow/status/ggml-org/llama.cpp/winget.yml?label=Winget)](https://github.com/ggml-org/llama.cpp/actions/workflows/winget.yml)
+| Project | Who | What |
+|---|---|---|
+| [llama.cpp](https://github.com/ggml-org/llama.cpp) | ggml-org | The engine. This GitHub repo is a **fork** of that tree. |
+| [llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts) | [stew675](https://github.com/stew675) | Optional RDNA patch quilt. We apply **selected** blocks. His `apply-all.sh` is **not** our default. |
+| [TheRock](https://github.com/ROCm/TheRock) | AMD | Current ROCm/HIP **development** home. CLR is the `rocm-systems` submodule. |
+| HIP runtime | AMD | `libamdhip64`. gfx1201 tensor-split **load hang** is HIP `rocblit`, not llama.cpp. We do **not** vendor the `.so`. |
 
-[ggml](https://github.com/ggml-org/ggml) / [ops](https://github.com/ggml-org/llama.cpp/blob/master/docs/ops.md) / [maintainer PRs](https://github.com/ggml-org/llama.cpp/issues?q=is%3Apr%20is%3Aopen%20draft%3AFalse%20(author%3Argerganov%20OR%20author%3AKitaitiMakoto%20OR%20author%3Adanbev%20OR%20author%3Aaldehir%20OR%20author%3Amax-krasnyansky%20OR%20author%3ACISC%20OR%20author%3Aggerganov%20OR%20author%3Aam17an%20OR%20author%3Abartowski1182%20OR%20author%3Anikwen%20OR%20author%3Ahipudding%20OR%20author%3AServeurpersoCom%20OR%20author%3Apwilkin%20OR%20author%3Areeselevine%20OR%20author%3Angxson%20OR%20author%3Ajeffbolznv%20OR%20author%3Amarty1885%20OR%20author%3A0cc4m%20OR%20author%3ATitaniumtown%20OR%20author%3Aangt%20OR%20author%3AIMbackK%20OR%20author%3Aarthw%20OR%20author%3AJohannesGaessler%20OR%20author%3AORippler%20OR%20author%3Aruixiang63%20OR%20author%3Axctan%20OR%20author%3Aallozaur%20OR%20author%3Ayomaytk%20OR%20author%3Aaendk%20OR%20author%3Agaugarg-nv%20OR%20author%3Ataronaeo%20OR%20author%3Aforforever73%20OR%20author%3Alhez%20OR%20author%3Anetrunnereve%20OR%20author%3Afairydreaming)%20sort%3Aupdated-desc) / [dev stats](https://github.com/ggml-org/llama.cpp-dev) / [lib llama API](https://github.com/ggml-org/llama.cpp/issues/9289) / [llama-server REST API](https://github.com/ggml-org/llama.cpp/issues/9291)
+License: llama.cpp **MIT**. stew675 boosts **MIT**. AMD HIP is AMD’s.
 
-</div>
+## Pins (bump only after a named A/B)
 
-## Quick start
+| Key | Pin |
+|---|---|
+| GPU target | `gfx1201` |
+| Distro ROCm | **7.2.4** (`/opt/rocm` → distro). **Never overwrite `/opt/rocm`.** |
+| HIP LOAD_OK (tensor-split) | `libamdhip64.so.7.2.53211` |
+| HIP hang class | `libamdhip64.so.7.2.70204` (stock 7.2.4) |
+| llama vehicle we measured | `5ea1b124e` + HIP 53211, dual R9700 |
+| stew quilt (his world) | `baseline/fe235f434` on **ROCm 7.14** — **not** this box |
+| stew in **our** product | **01 only** (`01-adaptive-mtp`) |
+| coding bar GGUF | `Qwen3.8-27B-UD-Q8_K_XL` (stay on XL; stew 10 is Q8_0/Q4/Q5/Q6 mmvq) |
 
-A few options to get `llama.cpp` installed on your machine:
+Full table: [`docs/rdna4/PIN.md`](docs/rdna4/PIN.md).
 
-- Visit https://llama.app and follow the instructions
-- Run with Docker - see our [Docker documentation](docs/docker.md)
-- Download pre-built binaries from the [releases page](https://github.com/ggml-org/llama.cpp/releases)
-- Build from source by cloning this repository - check out [our build guide](docs/build.md)
+## Layout
 
-Once installed:
-
-```sh
-# Download and run a model directly from Hugging Face
-llama cli -hf ggml-org/Qwen3.5-0.8B-GGUF
-
-# Launch OpenAI-compatible API server
-llama serve -hf ggml-org/Qwen3.5-0.8B-GGUF
+```
+├── README.md                 # this file
+├── AGENTS.md                 # fail-closed contract for AI agents
+├── RDNA4.md                  # one-page charter
+├── docs/rdna4/
+│   ├── PIN.md                # version pins
+│   ├── HIP.md                # hang is HIP, overlay recipe
+│   ├── HIP-BUILD.md          # isolated CLR prefix (no /opt/rocm writes)
+│   ├── STEW.md               # which stew blocks, measured
+│   ├── ROCM-PR.md            # CLR rocblit PR draft — not filed
+│   └── patches/rocblit-gfx1201-rect-dma.patch
+├── scripts/
+│   ├── apply-rocm.sh         # check / env / cmake / stew-01
+│   └── build-hip-overlay.sh  # isolated libamdhip64 from CLR + patch
+└── .github/workflows/rdna4-stew01-apply.yml   # apply-canary, no GPU
 ```
 
-<table align="center">
-    <tr>
-        <td align="center" width=50%>
-            <img width="1310" height="888" alt="VLM session with `llama cli`" src="https://github.com/user-attachments/assets/88726b48-1713-48aa-a525-95a02e78afc4" />
-            <i>VLM session with <b>llama cli</b></i>
-        </td>
-        <td align="center">
-            <img width="1392" height="958" alt="Built-in web UI against `llama serve` running Qwen 3.6" src="https://github.com/user-attachments/assets/b402f972-2e32-4def-8771-8d849f08cf2e" />
-            <i>Built-in web UI against <b>llama serve</b></i>
-        </td>
-    </tr>
-<table>
+The rest of the tree is upstream llama.cpp. Engine docs live **there**: [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp).
 
-## Description
+## Hard rules
 
-The main goal of `llama.cpp` is to enable LLM (and VLM) inference with minimal setup and state-of-the-art performance on
-a wide range of hardware - locally and in the cloud.
+1. **Do not overwrite `/opt/rocm`.** Overlay = extra prefix + `LD_LIBRARY_PATH`.
+2. **Do not vendor or copy AMD `.so` files into this repo.**
+3. **Do not run stew `apply-all.sh` as product.** 01 only unless a named A/B on **this** GGUF says otherwise.
+4. Tensor-split **discrete gfx1201 only**. Raphael / iGPU is **not** a third R9700.
+5. Load hang fix is **HIP `rocblit`**, not a llama memcpy patch. Do not upstream llama “hang workarounds” as the answer.
+6. Do **not** open a GitHub issue/PR against ROCm or llama.cpp unless the human names that action. Draft: [`docs/rdna4/ROCM-PR.md`](docs/rdna4/ROCM-PR.md).
 
-- Plain C/C++ implementation without any dependencies
-- Apple silicon is a first-class citizen - optimized via ARM NEON, Accelerate and Metal frameworks
-- AVX, AVX2, AVX512 and AMX support for x86 architectures
-- RVV, ZVFH, ZFH, ZICBOP and ZIHINTPAUSE support for RISC-V architectures
-- 1.5-bit, 2-bit, 3-bit, 4-bit, 5-bit, 6-bit, and 8-bit integer quantization for faster inference and reduced memory use
-- Custom CUDA kernels for running LLMs on NVIDIA GPUs (support for AMD GPUs via HIP and Moore Threads GPUs via MUSA)
-- Vulkan and SYCL backend support
-- CPU+GPU hybrid inference to partially accelerate models larger than the total VRAM capacity
+## Consumer / agent workflow
 
-The `llama.cpp` project is build on top of the [ggml](https://github.com/ggml-org/ggml) library.
+```bash
+git clone https://github.com/onchainapps/rocm-llama.cpp
+cd rocm-llama.cpp
 
-## Supported backends
+# 0. what HIP is actually loaded?
+./scripts/apply-rocm.sh check
+```
 
-| Backend | Target devices |
-| --- | --- |
-| [BLAS](docs/build.md#blas-build) | All |
-| [BLIS](docs/backend/BLIS.md) | All |
-| [CANN](docs/build.md#cann) | Ascend NPU |
-| [CUDA](docs/build.md#cuda) | Nvidia GPU |
-| [HIP](docs/build.md#hip) | AMD GPU |
-| [Hexagon [In Progress]](docs/backend/snapdragon/README.md) | Snapdragon |
-| [IBM zDNN](docs/backend/zDNN.md) | IBM Z & LinuxONE |
-| [MUSA](docs/build.md#musa) | Moore Threads GPU |
-| [Metal](docs/build.md#metal-build) | Apple Silicon |
-| [OpenCL](docs/backend/OPENCL.md) | Adreno GPU |
-| [OpenVINO [In Progress]](docs/backend/OPENVINO.md) | Intel CPUs, GPUs, and NPUs |
-| [RPC](https://github.com/ggml-org/llama.cpp/tree/master/tools/rpc) | All |
-| [SYCL](docs/backend/SYCL.md) | Intel GPU |
-| [VirtGPU](docs/backend/VirtGPU.md) | VirtGPU APIR |
-| [Vulkan](docs/build.md#vulkan) | GPU |
-| [WebGPU](docs/build.md#webgpu) | All |
-| [ZenDNN](docs/build.md#zendnn) | AMD CPU |
+`check` prints the resolved `libamdhip64` path and hang vs LOAD_OK soname.
 
-## Documentation
+### If resolved HIP is `*.70204` (hang path)
 
-#### Tools
+Stock ROCm 7.2.4 dual-GPU tensor-split can stick at weight load:
 
-- [cli](tools/cli/README.md)
-- [completion](tools/completion/README.md)
-- [server](tools/server/README.md)
-- [GBNF grammars](grammars/README.md)
+`load_all_data` → `hipMemcpy2DAsync` → `KernelBlitManager::writeBufferRect` pin+`copyBufferRect` → HSA wait.
 
-#### Development
+Same llama binary, swap HIP soname to **53211** (gfx1201 → line DMA) → LOAD_OK. HSA *why* is still **unproven**.
 
-- [How to build](docs/build.md)
-- [Running on Docker](docs/docker.md)
-- [Build on Android](docs/android.md)
-- [Multi-GPU usage](docs/multi-gpu.md)
-- [Performance troubleshooting](docs/development/token_generation_performance_tips.md)
-- [GGML tips & tricks](https://github.com/ggml-org/llama.cpp/wiki/GGML-Tips-&-Tricks)
-- [XCFramework](docs/xcframework.md)
-- [Completions](docs/completions.md)
-- [Models](docs/models.md)
-- [Release process](docs/release.md)
+Build an **isolated** HIP prefix (needs ROCm 7.2.4 headers/clang already installed):
 
-## Contributing
+```bash
+git clone https://github.com/ROCm/rocm-systems.git "$HOME/src/rocm-systems-7.2.4"
+git -C "$HOME/src/rocm-systems-7.2.4" checkout 97f5574fe2fdc7bef44fb01545347912ee9f1779   # rocm-7.2.4
 
-- Contributors can open PRs
-- Collaborators will be invited based on contributions
-- Maintainers can push to branches in the `llama.cpp` repo and merge PRs into the `master` branch
-- Any help with managing issues, PRs and projects is very appreciated!
-- Read the [CONTRIBUTING.md](CONTRIBUTING.md) for more information
+PREFIX="$HOME/.cache/rocm-llama-hip-53211"
+./scripts/build-hip-overlay.sh \
+  --systems-dir "$HOME/src/rocm-systems-7.2.4" \
+  --prefix "$PREFIX"
 
-## Acknowledgements
+eval "$(./scripts/apply-rocm.sh env --prefix "$PREFIX")"
+./scripts/apply-rocm.sh check
+# ldd on libggml-hip.so must realpath to libamdhip64.so.7.2.53211
+```
 
-- [yhirose/cpp-httplib](https://github.com/yhirose/cpp-httplib) - Single-header HTTP server, used by `llama-server` - MIT license
-- [nothings/stb](https://github.com/nothings/stb) - Single-header image format decoder, used by multimodal subsystem - Public domain
-- [nlohmann/json](https://github.com/nlohmann/json) - Single-header JSON library, used by various tools/examples - MIT License
-- [mackron/miniaudio](https://github.com/mackron/miniaudio) - Single-header audio format decoder, used by multimodal subsystem - Public domain
-- [sheredom/subprocess.h](https://github.com/sheredom/subprocess.h) - Single-header process launching solution for C and C++ - Public domain
+Exact cmake and refuse-`/opt/rocm` gates: [`docs/rdna4/HIP-BUILD.md`](docs/rdna4/HIP-BUILD.md).
+
+This lab’s measured overlay (example, **your** box will differ):
+
+```text
+/home/don/.cache/hermes-builds/hip-gfx1201-rect-dma-20260829b/prefix/lib/libamdhip64.so.7.2.53211
+```
+
+Shipping tree still contains the hang soname:
+
+```text
+/opt/rocm/lib/libamdhip64.so.7.2.70204     # hang class — leave it
+/opt/rocm/lib/libamdhip64.so.7.2.53211     # LOAD_OK if the linker actually picks this
+```
+
+Always `readlink -f /opt/rocm/lib/libamdhip64.so.7` — do not assume.
+
+### Build llama.cpp (HIP, gfx1201)
+
+```bash
+./scripts/apply-rocm.sh cmake --run
+# flags: see docs/rdna4/PIN.md
+```
+
+### Optional: stew 01 (adaptive MTP) — product for coding
+
+```bash
+git clone https://github.com/stew675/llama-cpp-rdna-boosts "$HOME/src/llama-cpp-rdna-boosts"
+./scripts/apply-rocm.sh stew-01 --boosts-dir "$HOME/src/llama-cpp-rdna-boosts"
+# if git apply fails: STOP. Do not --reject. See docs/rdna4/STEW.md
+./scripts/apply-rocm.sh cmake --run
+```
+
+Credit in any binary you ship: **llama.cpp + stew675 01-adaptive-mtp + HIP 53211**.
+
+### Serve (this lab)
+
+Discrete cards only. mmap GGUF. Lab tensor port here is `:18080`.
+
+```bash
+# HIP overlay already in the environment from apply-rocm.sh env
+./build-rocm/bin/llama-server \
+  -m /path/to/Qwen3.8-27B-UD-Q8_K_XL.gguf \
+  --device ROCm0,ROCm1 \
+  --split-mode tensor --tensor-split 1,1 \
+  -c 262144 --flash-attn on \
+  --cache-type-k q8_0 --cache-type-v q8_0 \
+  --spec-type draft-mtp-adaptive \
+  --spec-draft-n-max 3 --spec-draft-n-min-adaptive 2 --spec-draft-p-min 0.0 \
+  --parallel 1 --port 18080
+```
+
+Vanilla in-tree MTP (`--spec-type draft-mtp`) is the big jump vs spec none. 01 is adaptive depth on top of that.
+
+## What we measured (honest)
+
+Vehicle: llama `5ea1b124e`, HIP **53211**, dual R9700 tensor-split, **UD-Q8_K_XL**, `-c 262144`.
+
+| stack | open (essay decode-512) | code (decode-512) | 10k prefill |
+|---|---|---|---|
+| spec none | ~27.3 | ~27.3 | — |
+| vanilla mtp2 | 43.0 | 56.2 | **1249** |
+| stew **01** adaptive | 42.9 | **61.8** | 1203 |
+| 01+10 | 43.5 | 59.9 | 1201 |
+| 01+10+02 | 43.6 | 59.7 | 1191 |
+
+- Real jump = **stock llama MTP**, not stew.
+- **01** helps **code**. Essays stay ~43.
+- **10** / **02** = wash on this GGUF. Not product.
+- 1337hero **53.1** open was a **Q8_0** path, not this XL file.
+
+## ROCm PR (HIP `.so` for everyone)
+
+**Ships in AMD HIP**, not in this llama fork. Current AMD tree: [TheRock](https://github.com/ROCm/TheRock) (`rocm-systems` submodule). Measured patch is CLR `rocblit.cpp` @ `97f5574` / rocm-7.2.4. gfx1201 skips kernel blit pin+`copyBufferRect` and uses `DmaBlitManager` line DMA.
+
+- Patch in-tree: [`docs/rdna4/patches/rocblit-gfx1201-rect-dma.patch`](docs/rdna4/patches/rocblit-gfx1201-rect-dma.patch)
+- Draft body (not filed): [`docs/rdna4/ROCM-PR.md`](docs/rdna4/ROCM-PR.md)
+- Unique HSA/kernel *why* still **UNPROVEN**. Do not claim a kernel fix.
+
+Post-merge: distro HIP; any HIP-built llama works. Pre-merge: overlay as above.
+
+## Tracking remotes
+
+```bash
+git remote add upstream https://github.com/ggml-org/llama.cpp.git
+git remote add stew-boosts https://github.com/stew675/llama-cpp-rdna-boosts.git
+# rebase onto upstream; do not merge. When llama ships 01, drop our copy of that patch.
+```
+
+GitHub CI only checks whether stew 01 still **applies**. Real LOAD_OK + code-512 is this lab’s dual R9700 + 53211.
+
+## Hardware this lab actually has
+
+- 2× AMD Radeon AI PRO R9700 (RDNA4, **gfx1201**, 32 GB)
+- Raphael iGPU **gfx1036** — skip for tensor-split
+- ~30 GB host RAM — GGUF mmap; giant BF16 loads will not fit
+
+## License
+
+MIT, same as llama.cpp.
