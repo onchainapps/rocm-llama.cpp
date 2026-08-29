@@ -2,7 +2,7 @@
 
 Lab fork of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) for **consumer RDNA4 (gfx1201)** — dual Radeon AI PRO R9700, ROCm/HIP tensor-split, long context, MTP.
 
-This tree **is** llama.cpp. The extra work is pins, HIP overlay, measured stew blocks, and an agent-safe setup path. We did not write llama.cpp and we do not rebrand [stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts).
+This tree **is** llama.cpp plus lab pins, a HIP overlay for the gfx1201 load hang, and an agent-safe setup path. From [stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts) we keep **one** optional patch: **01 adaptive MTP**. The rest of his quilt we measured on this GGUF and did not take.
 
 **Point an AI agent at [`AGENTS.md`](AGENTS.md).** Humans can follow the same commands below.
 
@@ -11,7 +11,7 @@ This tree **is** llama.cpp. The extra work is pins, HIP overlay, measured stew b
 | Project | Who | What |
 |---|---|---|
 | [llama.cpp](https://github.com/ggml-org/llama.cpp) | ggml-org | The engine. This GitHub repo is a **fork** of that tree. |
-| [llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts) | [stew675](https://github.com/stew675) | Optional RDNA patch quilt. We apply **selected** blocks. His `apply-all.sh` is **not** our default. |
+| [llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts) | [stew675](https://github.com/stew675) | **01-adaptive-mtp** only (optional). Not `apply-all`. |
 | [TheRock](https://github.com/ROCm/TheRock) | AMD | Current ROCm/HIP **development** home. CLR is the `rocm-systems` submodule. |
 | HIP runtime | AMD | `libamdhip64`. gfx1201 tensor-split **load hang** is HIP `rocblit`, not llama.cpp. We do **not** vendor the `.so`. |
 
