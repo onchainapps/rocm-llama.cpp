@@ -1,5 +1,9 @@
 # llama.cpp
 
+> **This GitHub repo (`onchainapps/rocm-llama.cpp`) is a lab fork, not upstream.**
+> We did not write llama.cpp. Credits: **[ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp)** (this tree), **[stew675/llama-cpp-rdna-boosts](https://github.com/stew675/llama-cpp-rdna-boosts)** (optional RDNA patches we may apply), **AMD ROCm/HIP** (runtime; we do not vendor `libamdhip64.so`).
+> RDNA4 / gfx1201 notes, HIP `.so` pin, and `scripts/apply-rocm.sh`: **[RDNA4.md](RDNA4.md)**.
+
 ![llama](https://raw.githubusercontent.com/ggml-org/llama.brand/refs/heads/master/cover/llama-cpp/cover-llama-cpp-dark.svg)
 
 <div align="center">
